@@ -1,0 +1,59 @@
+package pl.ibcgames.smvotifier.commands;
+
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.jetbrains.annotations.NotNull;
+import pl.ibcgames.smvotifier.Consts;
+import pl.ibcgames.smvotifier.Utils;
+import pl.ibcgames.smvotifier.Votifier;
+import pl.ibcgames.smvotifier.modules.Configuration;
+import pl.ibcgames.smvotifier.response.VoteResponse;
+
+import java.util.List;
+
+public class Vote implements CommandExecutor {
+
+    private final Votifier plugin;
+    private final Configuration config;
+
+    private List<String> messages;
+    private String voteUrl;
+
+    public Vote(Votifier plugin) {
+        this.plugin = plugin;
+        this.config = plugin.getConfiguration();
+    }
+
+    @Override
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+        Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
+            try {
+                if (Utils.sendTokenInvalid(this.config, sender)) {
+                    return;
+                }
+
+                if (voteUrl == null) {
+                    sender.sendMessage(Utils.textComponent(Consts.LOADING_DATA_MESSAGE, NamedTextColor.GREEN));
+                    var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + this.config.getToken() + "/get-vote", VoteResponse.class);
+
+                    messages = response.text();
+                    voteUrl = response.voteUrl();
+                }
+
+                for (var message : messages) {
+                    sender.sendMessage(Utils.message(message));
+                }
+                sender.sendMessage(Utils.message(voteUrl)); // TODO: clickable URL
+            }
+            catch (Exception e) {
+                this.plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_VOTE_DATA_MESSAGE, e);
+                sender.sendMessage(Utils.textComponent(Consts.ERROR_DOWNLOAD_VOTE_DATA_PLAYER_MESSAGE, NamedTextColor.RED));
+            }
+        });
+
+        return true;
+    }
+}

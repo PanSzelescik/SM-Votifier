@@ -1,57 +1,36 @@
 package pl.ibcgames.smvotifier;
 
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import pl.ibcgames.smvotifier.Modules.Configuration;
+import pl.ibcgames.smvotifier.commands.Reward;
+import pl.ibcgames.smvotifier.commands.Test;
+import pl.ibcgames.smvotifier.commands.Vote;
+import pl.ibcgames.smvotifier.modules.Configuration;
 import pl.ibcgames.smvotifier.integration.placeholderapi.PlaceholderAPIIntegration;
-import pl.panszelescik.scheduler.Scheduler;
-import pl.panszelescik.scheduler.api.IScheduler;
-
-import java.util.logging.Logger;
 
 public final class Votifier extends JavaPlugin {
 
-    public static Logger log = Bukkit.getLogger();
     public static Votifier plugin;
-    public static String token;
-    public static Configuration Config;
-    public static IScheduler scheduler;
+    private static Configuration config;
 
     @Override
     public void onEnable() {
         plugin = this;
-        scheduler = Scheduler.createScheduler(this);
-        Config = new Configuration(this);
-        this.saveDefaultConfig();
+        config = new Configuration(this);
 
-        token = this.plugin.getConfiguration().get().getString("identyfikator");
-
-        if (token == null || token.equalsIgnoreCase("tutaj_wpisz_identyfikator")) {
-            this.warning("Brak identyfikatora serwera w konfiguracji SM-Votifier");
-            this.warning("Wiecej informacji znajdziesz pod adresem:");
-            this.warning("https://serwery-minecraft.pl/konfiguracja-pluginu");
+        if (config.isTokenInvalid()) {
+            this.getSLF4JLogger().warn(Consts.NO_IDENTIFIER_MESSAGE_1);
+            this.getSLF4JLogger().warn(Consts.NO_IDENTIFIER_MESSAGE_2);
+            this.getSLF4JLogger().warn(Consts.NO_IDENTIFIER_MESSAGE_3);
         } else {
             PlaceholderAPIIntegration.register();
         }
 
-        this.getCommand("sm-glosuj").setExecutor(new Vote());
-        this.getCommand("sm-nagroda").setExecutor(new Reward());
-        this.getCommand("sm-test").setExecutor(new Test());
-    }
-
-    @Override
-    public void onDisable() {
+        this.getCommand(Consts.COMMAND_VOTE_NAME).setExecutor(new Vote(this));
+        this.getCommand(Consts.COMMAND_REWARD_NAME).setExecutor(new Reward(this));
+        this.getCommand(Consts.COMMAND_TEST_NAME).setExecutor(new Test(this));
     }
 
     public Configuration getConfiguration() {
-        return this.Config;
-    }
-
-    public void log(String log) {
-        plugin.log.info("[SM-Votifier] " + log);
-    }
-
-    public void warning(String log) {
-        plugin.log.warning("[SM-Votifier] " + log);
+        return config;
     }
 }
