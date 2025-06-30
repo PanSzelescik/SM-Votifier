@@ -70,9 +70,7 @@ public class Utils {
 
     public static void executeCommands(Votifier plugin, CommandSender sender) {
         for (var cmd : plugin.getConfiguration().getCommands()) {
-            cmd = cmd.replace(Consts.PLAYER_PLACEHOLDER, sender.getName());
-            final var finalCmd = cmd;
-
+            final var finalCmd = cmd.replace(Consts.PLAYER_PLACEHOLDER, sender.getName());
             plugin.scheduleSync(() -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
         }
     }
