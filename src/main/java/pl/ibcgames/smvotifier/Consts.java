@@ -22,6 +22,7 @@ public final class Consts {
     public static final String NO_CONFIG_MESSAGE = "Nie znaleziono pliku konfiguracyjnego. Wygenerowano pusty plik";
     public static final String PLACEHOLDERAPI_FOUND_MESSAGE = "Znaleziono PlaceholderAPI, ładowanie zmiennych...";
 
+    public static final String ERROR_MESSAGE = "Error: ";
     public static final String LOADING_DATA_MESSAGE = "Trwa pobieranie danych...";
     public static final String CHECKING_VOTE_MESSAGE = "Sprawdzamy Twój głos, proszę czekać...";
     public static final String CONFIG_RELOADED_MESSAGE = "Konfiguracja pluginu została przeładowana";

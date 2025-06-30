@@ -52,7 +52,7 @@ public class Utils {
                 return GSON.fromJson(body, classResponse);
             }
 
-            throw new IllegalStateException("Error: " + response.statusCode() + ": " + body);
+            throw new IllegalStateException(Consts.ERROR_MESSAGE + response.statusCode() + ": " + body);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
