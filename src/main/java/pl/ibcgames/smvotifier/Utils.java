@@ -34,7 +34,7 @@ public class Utils {
     }
 
     public static <T> T sendRequest(String url, Class<T> classResponse) {
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        try (var client = HttpClient.newHttpClient()) {
             var request = HttpRequest
                     .newBuilder()
                     .uri(URI.create(url))
