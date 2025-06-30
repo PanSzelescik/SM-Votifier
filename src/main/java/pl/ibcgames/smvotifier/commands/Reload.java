@@ -21,10 +21,6 @@ public class Reload implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
-            if (Utils.sendOpRequired(sender)) {
-                return;
-            }
-
             this.plugin.reloadConfiguration();
 
             this.plugin.getSLF4JLogger().info(Consts.CONFIG_RELOADED_MESSAGE);

@@ -7,8 +7,6 @@ public final class Consts {
     public static final String PLUGIN_AUTHOR = "serwery-minecraft.pl";
     public static final String WEBPAGE_URL = "https://serwery-minecraft.pl";
 
-    public static final String PERMISSION_NAME = PLUGIN_IDENTIFIER + ".nagroda";
-
     public static final String CONFIG_IDENTIFIER_NAME = "identyfikator";
     public static final String CONFIG_REQUIRE_PERMISSION_NAME = "wymagaj_uprawnien";
     public static final String CONFIG_COMMANDS_NAME = "komendy";
@@ -34,8 +32,6 @@ public final class Consts {
     public static final String ERROR_DOWNLOAD_USER_VOTE_DATA_MESSAGE = "Nie udało się sprawdzić głosu gracza {}";
     public static final String ERROR_DOWNLOAD_USER_VOTE_DATA_PLAYER_MESSAGE = "Nie udało się pobrać danych, spróbuj później";
     public static final String ERROR_TEST_REWARD_MESSAGE = "Nie udało się przetestować nagrody";
-    public static final String PERMISSION_REQUIRED_MESSAGE = "Potrzebujesz uprawnienia ";
-    public static final String OP_REQUIRED_MESSAGE = "Ta komenda jest dostępna tylko dla operatorów serwera";
     public static final String COMMAND_TIMEOUT_MESSAGE_1 = "Ta komenda może być użyta za ";
     public static final String COMMAND_TIMEOUT_MESSAGE_2 = "sekund";
     public static final String USER_CAN_NOT_CLAIM_REWARD_MESSAGE = "Nie udało się odebrać nagrody, spróbuj później";

@@ -5,17 +5,34 @@ website: https://serwery-minecraft.pl
 version: @version@
 commands:
   sm-test:
-    description: Przetestuj nagrode za glosowanie na serwery-minecraft.pl
+    description: Przetestuj nagrodę za głosowanie na serwery-minecraft.pl
     usage: /sm-test
+    permission: smvotifier.test
   sm-nagroda:
-    description: Odbierz nagrode za glosowanie na serwery-minecraft.pl
+    description: Odbierz nagrodę za głosowanie na serwery-minecraft.pl
     usage: /sm-nagroda
+    permission: smvotifier.nagroda
   sm-glosuj:
-    description: Pokaz adres strony do glosowania
+    description: Pokaż adres strony do głosowania
     usage: /sm-glosuj
+    permission: smvotifier.glosuj
   sm-reload:
-    description: Przeladuj konfiguracje pluginu
+    description: Przeładuj konfigurację pluginu
     usage: /sm-reload
+    permission: smvotifier.reload
+permissions:
+  smvotifier.test:
+    description: Przetestuj nagrodę za głosowanie na serwery-minecraft.pl
+    default: op
+  smvotifier.nagroda:
+    description: Odbierz nagrodę za głosowanie na serwery-minecraft.pl
+    default: true
+  smvotifier.glosuj:
+    description: Pokaż adres strony do głosowania
+    default: true
+  smvotifier.reload:
+    description: Przeładuj konfigurację pluginu
+    default: op
 softdepend: [PlaceholderAPI]
 api-version: 1.13
 folia-supported: true

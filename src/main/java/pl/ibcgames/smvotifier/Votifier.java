@@ -27,7 +27,6 @@ public final class Votifier extends JavaPlugin {
             PlaceholderAPIIntegration.register(this);
         }
 
-
         this.getCommand(Consts.COMMAND_VOTE_NAME).setExecutor(vote = new Vote(this));
         this.getCommand(Consts.COMMAND_REWARD_NAME).setExecutor(reward = new Reward(this));
         this.getCommand(Consts.COMMAND_TEST_NAME).setExecutor(new Test(this));

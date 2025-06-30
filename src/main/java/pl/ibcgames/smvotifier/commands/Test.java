@@ -22,16 +22,8 @@ public class Test implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
             try {
-                if (Utils.sendOpRequired(sender)) {
-                    return;
-                }
-
                 var config = this.plugin.getConfiguration();
                 if (Utils.sendTokenInvalid(config, sender)) {
-                    return;
-                }
-
-                if (Utils.sendPermissionRequired(config, sender)) {
                     return;
                 }
 

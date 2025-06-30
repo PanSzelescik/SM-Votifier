@@ -68,23 +68,6 @@ public class Utils {
         return false;
     }
 
-    public static boolean sendOpRequired(CommandSender sender) {
-        if (!sender.isOp()) {
-            sender.sendMessage(textComponent(Consts.OP_REQUIRED_MESSAGE, NamedTextColor.RED));
-            return true;
-        }
-        return false;
-    }
-
-    public static boolean sendPermissionRequired(Configuration config, CommandSender sender) {
-        if (config.requirePermission() && !sender.hasPermission(Consts.PERMISSION_NAME)) {
-            sender.sendMessage(textComponent(Consts.PERMISSION_REQUIRED_MESSAGE, NamedTextColor.RED)
-                    .append(textComponent(Consts.PERMISSION_NAME, NamedTextColor.GREEN)));
-            return true;
-        }
-        return false;
-    }
-
     public static void executeCommands(Votifier plugin, CommandSender sender) {
         for (var cmd : plugin.getConfiguration().getCommands()) {
             cmd = cmd.replace(Consts.PLAYER_PLACEHOLDER, sender.getName());

@@ -32,10 +32,6 @@ public class Reward implements CommandExecutor {
                     return;
                 }
 
-                if (Utils.sendPermissionRequired(config, sender)) {
-                    return;
-                }
-
                 if (this.timeouts.containsKey(sender.getName())) {
                     Date d = this.timeouts.get(sender.getName());
                     long diff = (long) Math.floor((new Date().getTime() / 1000) - (d.getTime() / 1000));
