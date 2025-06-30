@@ -2,7 +2,6 @@ package pl.ibcgames.smvotifier.integration.placeholderapi;
 
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import pl.ibcgames.smvotifier.Consts;
@@ -16,6 +15,8 @@ import java.util.Date;
 import java.util.List;
 
 public class SMExpansion extends PlaceholderExpansion {
+
+    private static final boolean PAPER_PLUGINMETA_EXISTS = Utils.classExists("io.papermc.paper.plugin.configuration.PluginMeta");
 
     private final Votifier plugin;
     private long votesCount = 0;
@@ -42,7 +43,7 @@ public class SMExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return plugin.getPluginMeta().getVersion();
+        return PAPER_PLUGINMETA_EXISTS ? plugin.getPluginMeta().getVersion() : plugin.getDescription().getVersion();
     }
 
     @Override
@@ -80,7 +81,7 @@ public class SMExpansion extends PlaceholderExpansion {
         }
 
         this.isFetching = true;
-        Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
+        this.plugin.scheduleAsync(() -> {
             try {
                 var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + plugin.getConfiguration().getToken() + "/get-plugin-details", GetPluginDetailsResponse.class);
 
@@ -91,8 +92,7 @@ public class SMExpansion extends PlaceholderExpansion {
                 responseCachedAt = new Date(response.responseCachedAt() * 1000);
 
                 this.lastUpdate = LocalDateTime.now();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_SERVER_DATA_MESSAGE, e);
             }
 

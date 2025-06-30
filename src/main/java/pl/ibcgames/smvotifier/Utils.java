@@ -26,7 +26,7 @@ public class Utils {
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-    public static TextComponent message(String message) {
+    public static Component message(String message) {
         return LegacyComponentSerializer
                 .legacyAmpersand()
                 .deserialize(message)
@@ -73,9 +73,7 @@ public class Utils {
             cmd = cmd.replace(Consts.PLAYER_PLACEHOLDER, sender.getName());
             final var finalCmd = cmd;
 
-            Bukkit.getGlobalRegionScheduler().execute(plugin, () -> {
-                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), finalCmd);
-            });
+            plugin.scheduleSync(() -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
         }
     }
 
@@ -87,5 +85,14 @@ public class Utils {
     public static TextComponent clickableUrlComponent(String url, TextColor color) {
         return textComponent(url, color)
                 .clickEvent(ClickEvent.openUrl(url));
+    }
+
+    public static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

@@ -1,7 +1,6 @@
 package pl.ibcgames.smvotifier.commands;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -25,7 +24,7 @@ public class Reward implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
-        Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
+        this.plugin.scheduleAsync(() -> {
             try {
                 var config = this.plugin.getConfiguration();
                 if (Utils.sendTokenInvalid(config, sender)) {
@@ -51,8 +50,7 @@ public class Reward implements CommandExecutor {
 
                 var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + config.getToken() + "/get-vote/" + sender.getName(), UserVoteResponse.class);
                 execute(response, sender);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 this.plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_USER_VOTE_DATA_MESSAGE, sender.getName(), e);
                 sender.sendMessage(Utils.textComponent(Consts.ERROR_DOWNLOAD_USER_VOTE_DATA_PLAYER_MESSAGE, NamedTextColor.RED));
             }

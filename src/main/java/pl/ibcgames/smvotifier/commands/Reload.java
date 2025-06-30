@@ -1,7 +1,6 @@
 package pl.ibcgames.smvotifier.commands;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,7 +19,7 @@ public class Reload implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-        Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
+        this.plugin.scheduleAsync(() -> {
             this.plugin.reloadConfiguration();
 
             this.plugin.getSLF4JLogger().info(Consts.CONFIG_RELOADED_MESSAGE);
