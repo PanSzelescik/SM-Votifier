@@ -9,12 +9,10 @@ import pl.ibcgames.smvotifier.integration.placeholderapi.PlaceholderAPIIntegrati
 
 public final class Votifier extends JavaPlugin {
 
-    public static Votifier plugin;
     private static Configuration config;
 
     @Override
     public void onEnable() {
-        plugin = this;
         config = new Configuration(this);
 
         if (config.isTokenInvalid()) {
@@ -22,7 +20,7 @@ public final class Votifier extends JavaPlugin {
             this.getSLF4JLogger().warn(Consts.NO_IDENTIFIER_MESSAGE_2);
             this.getSLF4JLogger().warn(Consts.NO_IDENTIFIER_MESSAGE_3);
         } else {
-            PlaceholderAPIIntegration.register();
+            PlaceholderAPIIntegration.register(this);
         }
 
         this.getCommand(Consts.COMMAND_VOTE_NAME).setExecutor(new Vote(this));

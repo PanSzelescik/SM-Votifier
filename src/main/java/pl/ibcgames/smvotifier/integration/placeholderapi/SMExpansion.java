@@ -17,6 +17,7 @@ import java.util.List;
 
 public class SMExpansion extends PlaceholderExpansion {
 
+    private final Votifier plugin;
     private long votesCount = 0;
     private Date votesCachedAt = new Date();
     private boolean isPromotionActive = false;
@@ -24,6 +25,10 @@ public class SMExpansion extends PlaceholderExpansion {
     private Date responseCachedAt = new Date();
     private LocalDateTime lastUpdate = LocalDateTime.now().minusMinutes(5);
     private boolean isFetching = false;
+
+    public SMExpansion(Votifier plugin) {
+        this.plugin = plugin;
+    }
 
     @Override
     public @NotNull String getIdentifier() {
@@ -37,7 +42,7 @@ public class SMExpansion extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return Votifier.plugin.getPluginMeta().getVersion();
+        return plugin.getPluginMeta().getVersion();
     }
 
     @Override
@@ -75,9 +80,9 @@ public class SMExpansion extends PlaceholderExpansion {
         }
 
         this.isFetching = true;
-        Bukkit.getAsyncScheduler().runNow(Votifier.plugin, (task) -> {
+        Bukkit.getAsyncScheduler().runNow(plugin, (task) -> {
             try {
-                var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + Votifier.plugin.getConfiguration().getToken() + "/get-plugin-details", GetPluginDetailsResponse.class);
+                var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + plugin.getConfiguration().getToken() + "/get-plugin-details", GetPluginDetailsResponse.class);
 
                 votesCount = response.votesCount();
                 votesCachedAt = new Date(response.votesCachedAt() * 1000);
@@ -88,7 +93,7 @@ public class SMExpansion extends PlaceholderExpansion {
                 this.lastUpdate = LocalDateTime.now();
             }
             catch (Exception e) {
-                Votifier.plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_SERVER_DATA_MESSAGE, e);
+                plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_SERVER_DATA_MESSAGE, e);
             }
 
             this.isFetching = false;

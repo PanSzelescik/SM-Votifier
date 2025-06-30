@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import pl.ibcgames.smvotifier.Consts;
 import pl.ibcgames.smvotifier.Utils;
 import pl.ibcgames.smvotifier.Votifier;
-import pl.ibcgames.smvotifier.modules.Configuration;
 import pl.ibcgames.smvotifier.response.UserVoteResponse;
 
 import java.util.Date;
@@ -18,23 +17,22 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Reward implements CommandExecutor {
 
     private final Votifier plugin;
-    private final Configuration config;
     private final ConcurrentHashMap<String, Date> timeouts = new ConcurrentHashMap<>();
 
     public Reward(Votifier plugin) {
         this.plugin = plugin;
-        this.config = plugin.getConfiguration();
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
         Bukkit.getAsyncScheduler().runNow(this.plugin, (task) -> {
             try {
-                if (Utils.sendTokenInvalid(this.config, sender)) {
+                var config = this.plugin.getConfiguration();
+                if (Utils.sendTokenInvalid(config, sender)) {
                     return;
                 }
 
-                if (Utils.sendPermissionRequired(this.config, sender)) {
+                if (Utils.sendPermissionRequired(config, sender)) {
                     return;
                 }
 
@@ -55,7 +53,7 @@ public class Reward implements CommandExecutor {
                 sender.sendMessage(Utils.textComponent(Consts.CHECKING_VOTE_MESSAGE, NamedTextColor.GREEN));
                 this.timeouts.put(sender.getName(), new Date());
 
-                var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + this.config.getToken() + "/get-vote/" + sender.getName(), UserVoteResponse.class);
+                var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + config.getToken() + "/get-vote/" + sender.getName(), UserVoteResponse.class);
                 execute(response, sender);
             }
             catch (Exception e) {

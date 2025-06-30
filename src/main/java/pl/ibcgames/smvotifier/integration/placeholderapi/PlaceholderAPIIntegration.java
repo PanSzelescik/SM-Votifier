@@ -14,10 +14,10 @@ public class PlaceholderAPIIntegration {
         return Bukkit.getPluginManager().getPlugin(getName()) != null;
     }
 
-    public static void register() {
+    public static void register(Votifier plugin) {
         if (!canLoad()) return;
 
-        Votifier.plugin.getSLF4JLogger().info(Consts.PLACEHOLDERAPI_FOUND_MESSAGE);
-        new SMExpansion().register();
+        plugin.getSLF4JLogger().info(Consts.PLACEHOLDERAPI_FOUND_MESSAGE);
+        new SMExpansion(plugin).register();
     }
 }

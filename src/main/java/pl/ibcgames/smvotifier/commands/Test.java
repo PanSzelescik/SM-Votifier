@@ -9,16 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import pl.ibcgames.smvotifier.Consts;
 import pl.ibcgames.smvotifier.Utils;
 import pl.ibcgames.smvotifier.Votifier;
-import pl.ibcgames.smvotifier.modules.Configuration;
 
 public class Test implements CommandExecutor {
 
     private final Votifier plugin;
-    private final Configuration config;
 
     public Test(Votifier plugin) {
         this.plugin = plugin;
-        this.config = plugin.getConfiguration();
     }
 
     @Override
@@ -29,11 +26,12 @@ public class Test implements CommandExecutor {
                     return;
                 }
 
-                if (Utils.sendTokenInvalid(this.config, sender)) {
+                var config = this.plugin.getConfiguration();
+                if (Utils.sendTokenInvalid(config, sender)) {
                     return;
                 }
 
-                if (Utils.sendPermissionRequired(this.config, sender)) {
+                if (Utils.sendPermissionRequired(config, sender)) {
                     return;
                 }
 
