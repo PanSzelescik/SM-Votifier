@@ -1,6 +1,7 @@
 package pl.ibcgames.smvotifier;
 
 import org.bukkit.plugin.java.JavaPlugin;
+import pl.ibcgames.smvotifier.commands.Reload;
 import pl.ibcgames.smvotifier.commands.Reward;
 import pl.ibcgames.smvotifier.commands.Test;
 import pl.ibcgames.smvotifier.commands.Vote;
@@ -10,6 +11,9 @@ import pl.ibcgames.smvotifier.integration.placeholderapi.PlaceholderAPIIntegrati
 public final class Votifier extends JavaPlugin {
 
     private static Configuration config;
+
+    private static Vote vote;
+    private static Reward reward;
 
     @Override
     public void onEnable() {
@@ -23,12 +27,23 @@ public final class Votifier extends JavaPlugin {
             PlaceholderAPIIntegration.register(this);
         }
 
-        this.getCommand(Consts.COMMAND_VOTE_NAME).setExecutor(new Vote(this));
-        this.getCommand(Consts.COMMAND_REWARD_NAME).setExecutor(new Reward(this));
+
+        this.getCommand(Consts.COMMAND_VOTE_NAME).setExecutor(vote = new Vote(this));
+        this.getCommand(Consts.COMMAND_REWARD_NAME).setExecutor(reward = new Reward(this));
         this.getCommand(Consts.COMMAND_TEST_NAME).setExecutor(new Test(this));
+        this.getCommand(Consts.COMMAND_RELOAD_NAME).setExecutor(new Reload(this));
     }
 
     public Configuration getConfiguration() {
         return config;
+    }
+
+    public void reloadConfiguration() {
+        config.reload();
+
+        vote.reload();
+        reward.reload();
+
+        PlaceholderAPIIntegration.reload();
     }
 }

@@ -54,4 +54,9 @@ public class Vote implements CommandExecutor {
 
         return true;
     }
+
+    public void reload() {
+        this.messages = List.of();
+        this.voteUrl = null;
+    }
 }

@@ -99,4 +99,14 @@ public class SMExpansion extends PlaceholderExpansion {
             this.isFetching = false;
         });
     }
+
+    public void reload() {
+        this.votesCount = 0;
+        this.votesCachedAt = new Date();
+        this.isPromotionActive = false;
+        this.promotionExpireAt = new Date();
+        this.responseCachedAt = new Date();
+        this.lastUpdate = LocalDateTime.now().minusMinutes(5);
+        this.isFetching = false;
+    }
 }

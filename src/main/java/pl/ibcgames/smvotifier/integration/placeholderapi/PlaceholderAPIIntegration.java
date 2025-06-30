@@ -6,6 +6,8 @@ import pl.ibcgames.smvotifier.Votifier;
 
 public class PlaceholderAPIIntegration {
 
+    public static SMExpansion expansion;
+
     public static String getName() {
         return "PlaceholderAPI";
     }
@@ -18,6 +20,14 @@ public class PlaceholderAPIIntegration {
         if (!canLoad()) return;
 
         plugin.getSLF4JLogger().info(Consts.PLACEHOLDERAPI_FOUND_MESSAGE);
-        new SMExpansion(plugin).register();
+
+        expansion = new SMExpansion(plugin);
+        expansion.register();
+    }
+
+    public static void reload() {
+        if (expansion == null) return;
+
+        expansion.reload();
     }
 }

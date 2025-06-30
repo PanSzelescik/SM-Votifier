@@ -65,6 +65,10 @@ public class Reward implements CommandExecutor {
         return true;
     }
 
+    public void reload() {
+        this.timeouts.clear();
+    }
+
     private void execute(UserVoteResponse response, CommandSender sender) {
         var error = response.error();
         if (error != null && !error.isEmpty()) {
