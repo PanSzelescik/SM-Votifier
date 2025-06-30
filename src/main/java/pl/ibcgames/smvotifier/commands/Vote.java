@@ -35,7 +35,7 @@ public class Vote implements CommandExecutor {
 
                 if (voteUrl == null) {
                     sender.sendMessage(Utils.textComponent(Consts.LOADING_DATA_MESSAGE, NamedTextColor.GREEN));
-                    var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + config.getToken() + "/get-vote", VoteResponse.class);
+                    var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + config.getToken() + "/get-vote?folia=1", VoteResponse.class);
 
                     messages = response.text();
                     voteUrl = response.voteUrl();
@@ -44,7 +44,7 @@ public class Vote implements CommandExecutor {
                 for (var message : messages) {
                     sender.sendMessage(Utils.message(message));
                 }
-                sender.sendMessage(Utils.message(voteUrl)); // TODO: clickable URL
+                sender.sendMessage(Utils.clickableUrlComponent(voteUrl, NamedTextColor.YELLOW));
             }
             catch (Exception e) {
                 this.plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_VOTE_DATA_MESSAGE, e);
