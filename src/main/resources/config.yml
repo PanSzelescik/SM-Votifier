@@ -2,10 +2,13 @@
 # https://serwery-minecraft.pl/konfiguracja-pluginu
 identyfikator: tutaj_wpisz_identyfikator
 
-# Jeśli chcesz ograniczyć dostęp do komendy /sm-nagroda
-#   false - komenda będzie dostępna dla każdego
-#   true - do jej użycia wymagane będzie uprawnienie smvotifier.nagroda
-wymagaj_uprawnien: false
+
+# Jeśli chcesz ograniczyć dostęp do komend użyj odpowiednich uprawnień:
+# /sm-glosuj - smvotifier.glosuj (domyślnie dostępne dla wszystkich)
+# /sm-nagroda - smvotifier.nagroda (domyślnie dostępne dla wszystkich)
+# /sm-test - smvotifier.test (domyślnie dostępne dla operatorów)
+# /sm-reload - smvotifier.reload (domyślnie dostępne dla operatorów)
+
 
 # Lista komend, która zostanie wysłana na konsolę po zweryfikowaniu głosu
 # {GRACZ} zostanie zastąpione nazwą gracza korzystającego z komendy

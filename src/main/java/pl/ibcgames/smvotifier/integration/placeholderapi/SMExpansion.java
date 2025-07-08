@@ -3,9 +3,11 @@ package pl.ibcgames.smvotifier.integration.placeholderapi;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
-import org.json.simple.JSONObject;
+import org.jetbrains.annotations.NotNull;
+import pl.ibcgames.smvotifier.Consts;
 import pl.ibcgames.smvotifier.Utils;
 import pl.ibcgames.smvotifier.Votifier;
+import pl.ibcgames.smvotifier.response.GetPluginDetailsResponse;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -14,6 +16,9 @@ import java.util.List;
 
 public class SMExpansion extends PlaceholderExpansion {
 
+    private static final boolean PAPER_PLUGINMETA_EXISTS = Utils.classExists("io.papermc.paper.plugin.configuration.PluginMeta");
+
+    private final Votifier plugin;
     private long votesCount = 0;
     private Date votesCachedAt = new Date();
     private boolean isPromotionActive = false;
@@ -22,23 +27,27 @@ public class SMExpansion extends PlaceholderExpansion {
     private LocalDateTime lastUpdate = LocalDateTime.now().minusMinutes(5);
     private boolean isFetching = false;
 
-    @Override
-    public String getIdentifier() {
-        return "smvotifier";
+    public SMExpansion(Votifier plugin) {
+        this.plugin = plugin;
     }
 
     @Override
-    public String getAuthor() {
-        return "serwery-minecraft.pl";
+    public @NotNull String getIdentifier() {
+        return Consts.PLUGIN_IDENTIFIER;
     }
 
     @Override
-    public String getVersion() {
-        return Votifier.plugin.getDescription().getVersion();
+    public @NotNull String getAuthor() {
+        return Consts.PLUGIN_AUTHOR;
     }
 
     @Override
-    public List<String> getPlaceholders() {
+    public @NotNull String getVersion() {
+        return PAPER_PLUGINMETA_EXISTS ? plugin.getPluginMeta().getVersion() : plugin.getDescription().getVersion();
+    }
+
+    @Override
+    public @NotNull List<String> getPlaceholders() {
         return Arrays.asList(
                 "votes_count",
                 "votes_cached_at",
@@ -56,20 +65,14 @@ public class SMExpansion extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer player, String params) {
         this.saveData();
 
-        switch (params) {
-            case "votes_count":
-                return String.valueOf(this.votesCount);
-            case "votes_cached_at":
-                return this.votesCachedAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.votesCachedAt);
-            case "is_promotion_active":
-                return this.isPromotionActive ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
-            case "promotion_expire_at":
-                return this.promotionExpireAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.promotionExpireAt);
-            case "response_cached_at":
-                return this.responseCachedAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.responseCachedAt);
-        }
-
-        return "";
+        return switch (params) {
+            case "votes_count" -> String.valueOf(this.votesCount);
+            case "votes_cached_at" -> this.votesCachedAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.votesCachedAt);
+            case "is_promotion_active" -> this.isPromotionActive ? PlaceholderAPIPlugin.booleanTrue() : PlaceholderAPIPlugin.booleanFalse();
+            case "promotion_expire_at" -> this.promotionExpireAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.promotionExpireAt);
+            case "response_cached_at" -> this.responseCachedAt == null ? "" : PlaceholderAPIPlugin.getDateFormat().format(this.responseCachedAt);
+            default -> "";
+        };
     }
 
     private void saveData() {
@@ -78,66 +81,32 @@ public class SMExpansion extends PlaceholderExpansion {
         }
 
         this.isFetching = true;
-        new Thread(() -> {
-            JSONObject json = Utils.sendRequest("https://serwery-minecraft.pl/api/server-by-key/" + Votifier.token + "/get-plugin-details");
-
+        this.plugin.scheduleAsync(() -> {
             try {
-                Object rawVotesCount = json.get("votes_count");
-                votesCount = rawVotesCount == null ? 0 : Long.parseLong(rawVotesCount.toString());
-            } catch (Throwable t) {
-                t.printStackTrace();
-                votesCount = 0;
+                var response = Utils.sendRequest(Consts.WEBPAGE_URL + "/api/server-by-key/" + plugin.getConfiguration().getToken() + "/get-plugin-details", GetPluginDetailsResponse.class);
+
+                votesCount = response.votesCount();
+                votesCachedAt = new Date(response.votesCachedAt() * 1000);
+                isPromotionActive = response.isPromotionActive();
+                promotionExpireAt = new Date(response.promotionExpireAt() * 1000);
+                responseCachedAt = new Date(response.responseCachedAt() * 1000);
+
+                this.lastUpdate = LocalDateTime.now();
+            } catch (Exception e) {
+                plugin.getSLF4JLogger().warn(Consts.ERROR_DOWNLOAD_SERVER_DATA_MESSAGE, e);
             }
 
-            try {
-                Object rawVotesCachedAt = json.get("votes_cached_at");
-                if (rawVotesCachedAt == null) {
-                    votesCachedAt = null;
-                } else {
-                    long votesCachedTimestamp = Long.parseLong(rawVotesCachedAt.toString());
-                    votesCachedAt = new Date(votesCachedTimestamp * 1000);
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-                votesCachedAt = null;
-            }
-
-            try {
-                Object rawIsPromotionActive = json.get("is_promotion_active");
-                isPromotionActive = rawIsPromotionActive == null ? false : Boolean.parseBoolean(rawIsPromotionActive.toString());
-            } catch (Throwable t) {
-                t.printStackTrace();
-                isPromotionActive = false;
-            }
-
-            try {
-                Object rawPromotionExpireAt = json.get("promotion_expire_at");
-                if (rawPromotionExpireAt == null) {
-                    promotionExpireAt = null;
-                } else {
-                    long promotionExpireTimestamp = Long.parseLong(rawPromotionExpireAt.toString());
-                    promotionExpireAt = new Date(promotionExpireTimestamp * 1000);
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-                promotionExpireAt = null;
-            }
-
-            try {
-                Object rawResponseCachedAt = json.get("response_cached_at");
-                if (rawResponseCachedAt == null) {
-                    responseCachedAt = null;
-                } else {
-                    long responseCachedTimestamp = Long.parseLong(rawResponseCachedAt.toString());
-                    responseCachedAt = new Date(responseCachedTimestamp * 1000);
-                }
-            } catch (Throwable t) {
-                t.printStackTrace();
-                responseCachedAt = null;
-            }
-
-            this.lastUpdate = LocalDateTime.now();
             this.isFetching = false;
-        }).start();
+        });
+    }
+
+    public void reload() {
+        this.votesCount = 0;
+        this.votesCachedAt = new Date();
+        this.isPromotionActive = false;
+        this.promotionExpireAt = new Date();
+        this.responseCachedAt = new Date();
+        this.lastUpdate = LocalDateTime.now().minusMinutes(5);
+        this.isFetching = false;
     }
 }

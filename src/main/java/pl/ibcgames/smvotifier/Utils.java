@@ -1,55 +1,96 @@
 package pl.ibcgames.smvotifier;
 
-import org.bukkit.ChatColor;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
+import pl.ibcgames.smvotifier.modules.Configuration;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 
 public class Utils {
-    public static String message(String message) {
-        return ChatColor.translateAlternateColorCodes('&', message);
+
+    private static final Gson GSON = new GsonBuilder()
+            .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .create();
+
+    public static Component message(String message) {
+        return LegacyComponentSerializer
+                .legacyAmpersand()
+                .deserialize(message)
+                .asComponent();
     }
 
-    public static JSONObject sendRequest(String url) {
-        try {
-            URL _url = new URL(url);
-            HttpURLConnection con = (HttpURLConnection) _url.openConnection();
-            con.setRequestMethod("GET");
+    public static <T> T sendRequest(String url, Class<T> classResponse) {
+        try (var client = HttpClient.newHttpClient()) {
+            var request = HttpRequest
+                    .newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .setHeader("Content-Type", "application/json; utf-8")
+                    .setHeader("Accept", "application/json")
+                    .timeout(Duration.ofSeconds(5))
+                    .version(HttpClient.Version.HTTP_2)
+                    .build();
 
-            con.setRequestProperty("Content-Type", "application/json; utf-8");
-            con.setRequestProperty("Accept", "application/json");
-            con.setConnectTimeout(5 * 1000);
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            var body = response.body();
 
-            int status = con.getResponseCode();
-            Reader streamReader = null;
-
-            if (status > 299) {
-                streamReader = new InputStreamReader(con.getErrorStream());
-            } else {
-                streamReader = new InputStreamReader(con.getInputStream());
+            if (response.statusCode() == 200) {
+                return GSON.fromJson(body, classResponse);
             }
 
-            BufferedReader in = new BufferedReader(streamReader);
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-
-            JSONParser parser = new JSONParser();
-            JSONObject json = (JSONObject) parser.parse(content.toString());
-            return json;
-        } catch (ParseException | IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException(Consts.ERROR_MESSAGE + response.statusCode() + ": " + body);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
-        return new JSONObject();
+    }
+
+    public static boolean sendTokenInvalid(Configuration config, CommandSender sender) {
+        if (config.isTokenInvalid()) {
+            sender.sendMessage(textComponent(Consts.NO_IDENTIFIER_MESSAGE_1, NamedTextColor.RED));
+            sender.sendMessage(textComponent(Consts.NO_IDENTIFIER_MESSAGE_2, NamedTextColor.RED));
+            sender.sendMessage(clickableUrlComponent(Consts.NO_IDENTIFIER_MESSAGE_3, NamedTextColor.GREEN));
+            return true;
+        }
+        return false;
+    }
+
+    public static void executeCommands(Votifier plugin, CommandSender sender) {
+        for (var cmd : plugin.getConfiguration().getCommands()) {
+            final var finalCmd = cmd.replace(Consts.PLAYER_PLACEHOLDER, sender.getName());
+            plugin.scheduleSync(() -> Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), finalCmd));
+        }
+    }
+
+    public static TextComponent textComponent(String text, TextColor color) {
+        return Component.text(text)
+                .color(color);
+    }
+
+    public static TextComponent clickableUrlComponent(String url, TextColor color) {
+        return textComponent(url, color)
+                .clickEvent(ClickEvent.openUrl(url));
+    }
+
+    public static boolean classExists(String className) {
+        try {
+            Class.forName(className);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }

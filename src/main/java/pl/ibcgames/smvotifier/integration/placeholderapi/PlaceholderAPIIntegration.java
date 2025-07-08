@@ -1,9 +1,12 @@
 package pl.ibcgames.smvotifier.integration.placeholderapi;
 
 import org.bukkit.Bukkit;
+import pl.ibcgames.smvotifier.Consts;
 import pl.ibcgames.smvotifier.Votifier;
 
 public class PlaceholderAPIIntegration {
+
+    public static SMExpansion expansion;
 
     public static String getName() {
         return "PlaceholderAPI";
@@ -13,10 +16,18 @@ public class PlaceholderAPIIntegration {
         return Bukkit.getPluginManager().getPlugin(getName()) != null;
     }
 
-    public static void register() {
+    public static void register(Votifier plugin) {
         if (!canLoad()) return;
 
-        Votifier.plugin.log("Znaleziono PlaceholderAPI, ladowanie zmiennych...");
-        new SMExpansion().register();
+        plugin.getSLF4JLogger().info(Consts.PLACEHOLDERAPI_FOUND_MESSAGE);
+
+        expansion = new SMExpansion(plugin);
+        expansion.register();
+    }
+
+    public static void reload() {
+        if (expansion == null) return;
+
+        expansion.reload();
     }
 }
